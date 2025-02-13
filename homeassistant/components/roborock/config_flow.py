@@ -32,11 +32,14 @@ from homeassistant.core import callback
 from .const import (
     CONF_BASE_URL,
     CONF_ENTRY_CODE,
+    CONF_EXTRA_DRAWABLES,
     CONF_USER_DATA,
     DEFAULT_DRAWABLES,
     DOMAIN,
     DRAWABLES,
+    EXTRA_DRAWABLES,
 )
+from .roborock_storage import async_remove_map_storage
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -194,7 +197,13 @@ class RoborockOptionsFlowHandler(OptionsFlow):
     ) -> ConfigFlowResult:
         """Manage the map object drawable options."""
         if user_input is not None:
+            for extra_drawable in EXTRA_DRAWABLES:
+                self.options.setdefault(CONF_EXTRA_DRAWABLES, {})[extra_drawable] = (
+                    user_input.pop(extra_drawable.value)
+                )
             self.options.setdefault(DRAWABLES, {}).update(user_input)
+            # Delete images from cache so that new drawable settings will update.
+            await async_remove_map_storage(self.hass, self._config_entry_id)
             return self.async_create_entry(title="", data=self.options)
         data_schema = {}
         for drawable, default_value in DEFAULT_DRAWABLES.items():
@@ -206,6 +215,16 @@ class RoborockOptionsFlowHandler(OptionsFlow):
                     ),
                 )
             ] = bool
+        for extra_drawable_color, extra_drawable_default in EXTRA_DRAWABLES.items():
+            data_schema[
+                vol.Required(
+                    extra_drawable_color.value,
+                    default=self.config_entry.options.get(CONF_EXTRA_DRAWABLES, {}).get(
+                        extra_drawable_color, extra_drawable_default
+                    ),
+                )
+            ] = bool
+
         return self.async_show_form(
             step_id=DRAWABLES,
             data_schema=vol.Schema(data_schema),

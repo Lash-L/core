@@ -6,7 +6,7 @@ from datetime import datetime
 import io
 
 from roborock import RoborockCommand
-from vacuum_map_parser_base.config.color import ColorsPalette
+from vacuum_map_parser_base.config.color import Color, ColorsPalette, SupportedColor
 from vacuum_map_parser_base.config.image_config import ImageConfig
 from vacuum_map_parser_base.config.size import Sizes
 from vacuum_map_parser_roborock.map_data_parser import RoborockMapDataParser
@@ -20,6 +20,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CONF_EXTRA_DRAWABLES,
     DEFAULT_DRAWABLES,
     DOMAIN,
     DRAWABLES,
@@ -43,8 +44,15 @@ async def async_setup_entry(
         for drawable, default_value in DEFAULT_DRAWABLES.items()
         if config_entry.options.get(DRAWABLES, {}).get(drawable, default_value)
     ]
+    colors_dict: dict[SupportedColor, Color] = {}
+    for extra_drawable, extra_drawable_val in config_entry.options.get(
+        CONF_EXTRA_DRAWABLES, {}
+    ).items():
+        if not extra_drawable_val:
+            colors_dict[SupportedColor(extra_drawable)] = (0, 0, 0, 0)
+
     parser = RoborockMapDataParser(
-        ColorsPalette(), Sizes(), drawables, ImageConfig(), []
+        ColorsPalette(colors_dict=colors_dict), Sizes(), drawables, ImageConfig(), []
     )
 
     def parse_image(map_bytes: bytes) -> bytes | None:

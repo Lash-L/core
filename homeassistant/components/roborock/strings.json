@@ -53,7 +53,9 @@
           "room_names": "Room names",
           "vacuum_position": "Vacuum position",
           "virtual_walls": "Virtual walls",
-          "zones": "Zones"
+          "zones": "Zones",
+          "color_map_inside": "Room backgrounds",
+          "color_map_outside": "Background"
         }
       }
     }

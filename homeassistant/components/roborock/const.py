@@ -1,5 +1,6 @@
 """Constants for Roborock."""
 
+from vacuum_map_parser_base.config.color import SupportedColor
 from vacuum_map_parser_base.config.drawable import Drawable
 
 from homeassistant.const import Platform
@@ -30,6 +31,10 @@ DEFAULT_DRAWABLES = {
     Drawable.VIRTUAL_WALLS: False,
     Drawable.ZONES: False,
 }
+CONF_EXTRA_DRAWABLES = "extra_drawables"
+EXTRA_DRAWABLES = {SupportedColor.MAP_INSIDE: True, SupportedColor.MAP_OUTSIDE: True}
+
+CONF_SHOW_BACKGROUND = "show_background"
 
 PLATFORMS = [
     Platform.BINARY_SENSOR,
